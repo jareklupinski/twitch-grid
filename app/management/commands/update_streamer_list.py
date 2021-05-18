@@ -15,14 +15,6 @@ TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID")
 TWITCH_APP_ACCESS_TOKEN = os.environ.get("TWITCH_APP_ACCESS_TOKEN")
 
 
-# don't use this if you're not using a free-tier service; use Django models instead
-@dataclass
-class Streamer:
-    viewer_count: int
-    url: str
-    thumbnail_url: str
-
-
 def get_twitch_api_oauth_token():
     url = "https://id.twitch.tv/oauth2/token"
     params = {
@@ -95,14 +87,15 @@ def get_games_list():
             #     id=user_id,
             #     defaults={
             #         "url": f"https://www.twitch.tv/{user_name}",
-            #         "viewer_count": viewer_count
+            #         "viewer_count": viewer_count,
+            #         "thumbnail_url": thumbnail_url
             #     }
             # )
-            new_streamer = Streamer(
-                url=f"https://www.twitch.tv/{user_name}",
-                viewer_count=viewer_count,
-                thumbnail_url=thumbnail_url
-            )
+            new_streamer = {
+                "url": f"https://www.twitch.tv/{user_name}",
+                "viewer_count": viewer_count,
+                "thumbnail_url": thumbnail_url
+            }
             streamers.append(new_streamer)
         new_game, _ = Game.objects.get_or_create(
             id=game_id,
