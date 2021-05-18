@@ -21,6 +21,7 @@ def get_twitch_api_oauth_token():
     response = requests.post(url=url, params=params)
     response_data = json.loads(response.text)
     access_token = response_data.get("access_token")
+    print(access_token)
     return access_token
 
 
