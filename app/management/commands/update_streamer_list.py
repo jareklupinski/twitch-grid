@@ -117,7 +117,7 @@ def get_games_list():
         )
         # new_game.streamers.set(streamers)
         # new_game.save()
-        print(f"Got {new_game.name} Streams, {viewer_count} total viewers")
+        print(f"Got {new_game.name} Streams, {total_viewers} total viewers")
     print("Deleting Old Games")
     old_games = Game.objects.exclude(id__in=game_ids)
     for game in old_games:
