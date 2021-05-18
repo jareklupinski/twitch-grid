@@ -4,9 +4,9 @@
     <title>Twitch Grid</title>
 </head>
 <body>
-    {{ game_list|length }} different games currently being streamed:
+    {{ game_total }} different games currently being streamed:
     <table>
-    {% for game in game_list %}
+    {% for game in page_obj %}
         <tr>
             <td>{{ game.name }}</td>
             {% for streamer in game.streamers %}
@@ -15,5 +15,23 @@
         </tr>
     {% endfor %}
     </table>
+
+    <div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
 </body>
 </html>
