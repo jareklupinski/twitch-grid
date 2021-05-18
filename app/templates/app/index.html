@@ -4,6 +4,27 @@
 <head>
     <title>Twitch Grid</title>
     <style>
+        a:link {
+            color: white;
+            background-color: transparent;
+            text-decoration: none;
+            text-shadow: 2px 2px rgba(0.1, 0.1, 0.1, 0.5);
+        }
+
+        a:visited {
+            color: white;
+            background-color: transparent;
+            text-decoration: none;
+            text-shadow: 2px 2px rgba(0.1, 0.1, 0.1, 0.5);
+        }
+
+        a:hover {
+            color: grey;
+            background-color: transparent;
+            text-decoration: none;
+            text-shadow: 5px 5px rgba(0.1, 0.1, 0.1, 0.9);
+        }
+
         table {
             width: 100%;
         }
@@ -16,10 +37,10 @@
         }
 
         .centered {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
     </style>
 </head>
@@ -28,7 +49,10 @@
     <table>
     {% for game in page_obj %}
         <tr>
-            <td><img src="{{ game.box_art_url | fill_in_dimensions }}" alt="{{ game.name }}" width="70" height="70"></td>
+            <td>
+                <img src="{{ game.box_art_url | fill_in_dimensions }}" alt="{{ game.name }}" width="70" height="70">
+                <div class="centered">{{ game.name }}</div>
+            </td>
             {% for streamer in game.streamers %}
                 <td class="game">
                     <a href="{{ streamer.url }}">
