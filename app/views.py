@@ -5,7 +5,7 @@ from app.models import Game, Process
 
 
 def index(request):
-    games = Game.objects.all().order_by("total_viewers")
+    games = Game.objects.all().order_by("-total_viewers")
     process = Process.objects.get(name="game_list_update")
     paginator = Paginator(games, 500)
     page_number = request.GET.get('page')
