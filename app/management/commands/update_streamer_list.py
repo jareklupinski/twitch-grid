@@ -1,5 +1,6 @@
 import os
 import time
+import requests
 
 import aiohttp
 import asyncio
@@ -16,20 +17,52 @@ TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID")
 TWITCH_APP_ACCESS_TOKEN = os.environ.get("TWITCH_APP_ACCESS_TOKEN")
 
 
-async def get_twitch_api_oauth_token(session):
+def get_twitch_api_oauth_token():
     url = "https://id.twitch.tv/oauth2/token"
     params = {
         "client_id": TWITCH_CLIENT_ID,
         "client_secret": TWITCH_APP_ACCESS_TOKEN,
         "grant_type": "client_credentials"
     }
-    async with session.post(url=url, params=params, timeout=0) as response:
-        response_data = await response.json()
-        access_token = response_data.get("access_token")
-        return access_token
+    response = requests.post(url=url, params=params)
+    response_data = response.json()
+    access_token = response_data.get("access_token")
+    return access_token
 
 
-async def get_twitch_api_data(url: str, token: str, session, game_id="", paginate=False, cursor=""):
+def get_twitch_api_data(url: str, token: str, game_id="", paginate=False, cursor=""):
+    data = []
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Client-Id": TWITCH_CLIENT_ID
+    }
+    while True:
+        # The two API calls used here, Get Top Games and Get Streams, use these parameters without colliding
+        params = {
+            "first": 100,
+            "after": cursor,
+            "game_id": game_id
+        }
+        response = requests.get(url=url, headers=headers, params=params)
+        response_data = response.json()
+        rate_limit_remaining_string = response.headers.get("Ratelimit-Remaining")
+        if rate_limit_remaining_string is not None:
+            rate_limit_remaining = int(rate_limit_remaining_string)
+            if rate_limit_remaining < 799:
+                print(f"--------Rate limit falling: {rate_limit_remaining}")
+        json_data = response_data.get("data")
+        for entry in json_data:
+            data.append(entry)
+        pagination = response_data.get("pagination")
+        cursor = None
+        if pagination is not None:
+            cursor = pagination.get("cursor")
+        if cursor is None or paginate is False:
+            break
+    return data
+
+
+async def async_get_twitch_api_data(url: str, token: str, session, game_id="", paginate=False, cursor=""):
     data = []
     headers = {
         "Authorization": f"Bearer {token}",
@@ -57,7 +90,8 @@ async def get_twitch_api_data(url: str, token: str, session, game_id="", paginat
             if pagination is not None:
                 cursor = pagination.get("cursor")
             if cursor is None or paginate is False:
-                return data
+                break
+    return data
 
 
 async def get_streamer_list(game, session, twitch_oauth_token):
@@ -68,7 +102,7 @@ async def get_streamer_list(game, session, twitch_oauth_token):
     total_viewers = 0
     # Get the streamers viewer count and url for each stream for this game
     # Set paginate to True to get more than 100 streamers per game if they exist
-    streamers_data = await get_twitch_api_data(
+    streamers_data = await async_get_twitch_api_data(
         url="https://api.twitch.tv/helix/streams",
         game_id=game_id,
         token=twitch_oauth_token,
@@ -96,38 +130,18 @@ async def get_streamer_list(game, session, twitch_oauth_token):
             "total_viewers": total_viewers
         }
     )
-    print(f"Got {game_name} Streams, {total_viewers} total viewers")
+    print(f"{new_game.name}: {total_viewers} total viewers")
 
 
-async def get_games_list():
-    conn = aiohttp.TCPConnector(limit=1)
+async def get_games_list(games, token):
+    conn = aiohttp.TCPConnector(limit=1)  # raise this until Twitch's rate limiter starts complaining
     session = aiohttp.ClientSession(connector=conn, timeout=0.0)
-    print("Getting OAuth Token")
-    twitch_oauth_token = await get_twitch_api_oauth_token(
-        session=session
-    )
-    print("Getting Top Twitch Games")
-    twitch_games = await get_twitch_api_data(
-        url="https://api.twitch.tv/helix/games/top",
-        paginate=True,
-        token=twitch_oauth_token,
-        session=session
-    )
     print("Getting Streamers for Top Games")
     await asyncio.gather(
-        *[get_streamer_list(game, session, twitch_oauth_token) for game in twitch_games]
+        *[get_streamer_list(game, session, token) for game in games]
     )
-    print("Deleting Old Games")
-    game_ids = [game.get("id") for game in twitch_games]
-    old_games = await sync_to_async(Game.objects.exclude)(id__in=game_ids)
-    await sync_to_async(old_games.delete)()
-    print("Setting timestamp")
-    await sync_to_async(Process.objects.update_or_create)(
-        name="game_list_update",
-        defaults={
-            "updated_at": timezone.now()
-        }
-    )
+    await session.close()
+    await conn.close()
 
 
 class Command(BaseCommand):
@@ -136,10 +150,22 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Starting Command")
         t0 = time.process_time()
+        print("Getting OAuth Token")
+        token = get_twitch_api_oauth_token()
+        print("Getting Top Twitch Games")
+        games = get_twitch_api_data(
+            url="https://api.twitch.tv/helix/games/top",
+            paginate=True,
+            token=token,
+        )
         print("Getting Games List")
-        asyncio.run(get_games_list())
-        print("Finished Getting Games List")
+        asyncio.run(get_games_list(games, token))
+        print("Deleting Old Games")
+        game_ids = [game.get("id") for game in games]
+        Game.objects.exclude(id__in=game_ids).delete()
+        print("Setting timestamp")
+        Process.objects.update_or_create(name="game_list_update", defaults={"updated_at": timezone.now()})
         t1 = (time.process_time() - t0) / 60
         # is this java
-        self.stdout.write(self.style.SUCCESS(f"Successfully got all Games and Streamers, took {t1} minutes"))
+        self.stdout.write(self.style.SUCCESS(f"Successfully got all Games and Streamers, took {t1:.2f} minutes"))
         return
