@@ -93,7 +93,7 @@ async def async_get_twitch_api_data(url: str, token: str, session, game_id=None,
         print(url)
         print(params)
         async with session.get(url=url, headers=headers, params=params) as response:
-            response_data = await json.loads(response.text)
+            response_data = await response.json()
             rate_limit_remaining_string = response.headers.get("Ratelimit-Remaining")
             if rate_limit_remaining_string is not None:
                 rate_limit_remaining = int(rate_limit_remaining_string)
