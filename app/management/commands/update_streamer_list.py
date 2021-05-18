@@ -11,8 +11,7 @@ from django.utils import timezone
 from app.models import Game, Process
 
 
-# add these to your Heroku -> Setting -> Config Vars using the same keys
-# https://dev.twitch.tv/console/apps/create
+# add these to your Heroku -> Setting -> Config Vars using the keys from https://dev.twitch.tv/console/apps/create
 TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID")
 TWITCH_APP_ACCESS_TOKEN = os.environ.get("TWITCH_APP_ACCESS_TOKEN")
 
