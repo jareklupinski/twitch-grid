@@ -3,7 +3,7 @@ from django.db import models
 
 class Streamer(models.Model):
     viewer_count = models.IntegerField()
-    url = models.TextField()
+    url = models.URLField()
 
 
 class Game(models.Model):
