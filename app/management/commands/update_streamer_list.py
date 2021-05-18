@@ -1,14 +1,26 @@
+from dataclasses import dataclass
 import json
 import os
 import requests
+import time
 
 from django.core.management.base import BaseCommand, CommandError
 
-from app.models import Game, Streamer
+from app.models import Game
 
 
+# add these to your Heroku -> Setting -> Config Vars using the same keys
+# https://dev.twitch.tv/console/apps/create
 TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID")
 TWITCH_APP_ACCESS_TOKEN = os.environ.get("TWITCH_APP_ACCESS_TOKEN")
+
+
+# don't use this if you're not using a free-tier service; use Django models instead
+@dataclass
+class Streamer:
+    viewer_count: int
+    url: str
+    thumbnail_url: str
 
 
 def get_twitch_api_oauth_token():
@@ -58,7 +70,7 @@ def get_twitch_api_data(url: str, token: str, game_id=None, paginate=False, curs
 
 def get_games_list():
     twitch_oauth_token = get_twitch_api_oauth_token()
-    # Get top 3000 games currently streaming on Twitch
+    # Get top games currently streaming on Twitch
     games = get_twitch_api_data(
         url="https://api.twitch.tv/helix/games/top",
         paginate=True,
@@ -75,25 +87,32 @@ def get_games_list():
             token=twitch_oauth_token
         )
         for streamer in streamers_data:
-            user_id = streamer.get("user_id")
             user_name = streamer.get("user_name")
             viewer_count = streamer.get("viewer_count")
-            new_streamer, _ = Streamer.objects.update_or_create(
-                id=user_id,
-                defaults={
-                    "url": f"https://www.twitch.tv/{user_name}",
-                    "viewer_count": viewer_count
-                }
+            thumbnail_url = streamer.get("thumbnail_url")
+            # user_id = streamer.get("user_id")
+            # new_streamer, _ = Streamer.objects.update_or_create(
+            #     id=user_id,
+            #     defaults={
+            #         "url": f"https://www.twitch.tv/{user_name}",
+            #         "viewer_count": viewer_count
+            #     }
+            # )
+            new_streamer = Streamer(
+                url=f"https://www.twitch.tv/{user_name}",
+                viewer_count=viewer_count,
+                thumbnail_url=thumbnail_url
             )
             streamers.append(new_streamer)
         new_game, _ = Game.objects.get_or_create(
             id=game_id,
             defaults={
-                "name": game_name
+                "name": game_name,
+                "streamers": streamers
             }
         )
-        new_game.streamers.set(streamers)
-        new_game.save()
+        # new_game.streamers.set(streamers)
+        # new_game.save()
         # Sanity check
         print(new_game.name)
 
@@ -102,7 +121,9 @@ class Command(BaseCommand):
     help = 'Updates all Games and Streamers in the database'
 
     def handle(self, *args, **options):
+        t0 = time.clock()
         get_games_list()
+        t1 = (time.clock() - t0) / 60
         # is this java
-        self.stdout.write(self.style.SUCCESS('Successfully got all Games and Streamers'))
+        self.stdout.write(self.style.SUCCESS(f"Successfully got all Games and Streamers, took {t1} minutes"))
         return
