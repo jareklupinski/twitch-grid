@@ -2,8 +2,8 @@ from django.db import models
 
 
 class Streamer(models.Model):
+    url = models.URLField(primary_key=True)
     viewer_count = models.IntegerField()
-    url = models.URLField()
 
 
 class Game(models.Model):
