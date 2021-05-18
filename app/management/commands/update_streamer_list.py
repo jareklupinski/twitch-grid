@@ -103,7 +103,7 @@ def get_games_list():
             defaults={
                 "name": game_name,
                 "box_art_url": game_box_art_url,
-                "streamers": json.dumps(streamers)
+                "streamers": streamers
             }
         )
         # new_game.streamers.set(streamers)
