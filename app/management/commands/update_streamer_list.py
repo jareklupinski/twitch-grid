@@ -108,7 +108,7 @@ def get_games_list():
             id=game_id,
             defaults={
                 "name": game_name,
-                "streamers": streamers
+                "streamers": json.dumps(streamers.__dict__)
             }
         )
         # new_game.streamers.set(streamers)
