@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Twitch Grid</title>
+    <title>Twitch Game Matrix</title>
     <style>
         table {
             width: 100%;
@@ -47,7 +47,7 @@
     </style>
 </head>
 <body>
-    {{ game_total }} different games currently being streamed, updated at {{ update_time }} GMT
+    {{ game_total }} different games being streamed at {{ update_time }} GMT
     <table>
     {% for game in page_obj %}
         <tr>
