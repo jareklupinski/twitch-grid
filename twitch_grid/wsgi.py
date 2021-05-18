@@ -2,6 +2,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'twitch_game_matrix.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'twitch_grid.settings')
 
 application = get_wsgi_application()

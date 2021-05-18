@@ -1,1 +1,1 @@
-web: gunicorn twitch_game_matrix.wsgi
+web: gunicorn twitch_grid.wsgi
