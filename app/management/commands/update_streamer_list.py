@@ -226,15 +226,15 @@ async def async_get_streamer_list(game, session, twitch_oauth_token):
         streamers.append(new_streamer)
         total_viewers += viewer_count
 
-    # new_game, _ = await sync_to_async(Game.objects.update_or_create)(
-    #     id=game_id,
-    #     defaults={
-    #         "name": game_name,
-    #         "box_art_url": game_box_art_url,
-    #         "streamers": streamers,
-    #         "total_viewers": total_viewers
-    #     }
-    # )
+    new_game, _ = await sync_to_async(Game.objects.update_or_create)(
+        id=game_id,
+        defaults={
+            "name": game_name,
+            "box_art_url": game_box_art_url,
+            "streamers": streamers,
+            "total_viewers": total_viewers
+        }
+    )
     print(f"Got {game_name} Streams, {total_viewers} total viewers")
 
 
