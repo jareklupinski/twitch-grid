@@ -110,11 +110,14 @@ def get_games_list():
         )
         # new_game.streamers.set(streamers)
         # new_game.save()
+        print(new_game.name)
     # Remove Games no longer listed
+    print("Deleting Old Games")
     db_games = Game.objects.exclude(id__in=game_ids)
     for game in db_games:
         game.delete()
     # Set updated_at timestamp for process
+    print("Setting timestamp")
     Process.objects.update_or_create(
         name="game_list_update",
         defaults={
