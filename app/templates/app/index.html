@@ -9,8 +9,11 @@
     {% for game in game_list %}
         <tr>
             <td>{{ game.name }}</td>
-            {% for streamer in game.streamers %}
-                <td class="game"><a href="{{ streamer.url }}">{{ streamer.viewer_count }}</a></td>
+            {% for key, value in game.streamers %}
+                <tr>
+                    <td>{{key}}</td><td>{{value}}</td>
+                </tr>
+{#                <td class="game"><a href="{{ streamer.url }}">{{ streamer.viewer_count }}</a></td>#}
             {% endfor %}
         </tr>
     {% endfor %}
