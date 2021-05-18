@@ -11,6 +11,15 @@
         td {
             height: 70px;
             width: 70px;
+            position: relative;
+            text-align: center;
+        }
+
+        .centered {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
         }
     </style>
 </head>
@@ -21,7 +30,12 @@
         <tr>
             <td><img src="{{ game.box_art_url | fill_in_dimensions }}" alt="{{ game.name }}" width="70" height="70"></td>
             {% for streamer in game.streamers %}
-                <td class="game"><a href="{{ streamer.url }}"><img src="{{ streamer.thumbnail_url | fill_in_dimensions  }}" alt="{{ streamer.viewer_count }}" width="70" height="70"></a></td>
+                <td class="game">
+                    <a href="{{ streamer.url }}">
+                        <img src="{{ streamer.thumbnail_url | fill_in_dimensions  }}" alt="{{ streamer.viewer_count }}" width="70" height="70">
+                        <div class="centered">{{ streamer.viewer_count }}</div>
+                    </a>
+                </td>
             {% endfor %}
         </tr>
     {% endfor %}
