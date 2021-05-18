@@ -4,9 +4,6 @@ from app.models import Game
 
 
 def index(request):
-    print("got request")
-    game_list = Game.objects.all()
-    print("got games")
+    game_list = Game.objects.all()[:10]
     context = {'game_list': game_list}
-    print("got context")
     return render(request, 'app/index.html', context)
