@@ -1,5 +1,8 @@
-from django.http import HttpResponse
+from django.shortcuts import render
 
+from app.models import Game
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the app index.")
+    game_list = Game.objects.all()
+    context = {'game_list': game_list}
+    return render(request, 'index.html', context)

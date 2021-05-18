@@ -71,6 +71,7 @@ def get_games_list():
     for game in games:
         game_id = game.get("id")
         game_name = game.get("name")
+        game_box_art_url = game.get("box_art_url")
         streamers = []
         # Get the streamers viewer count and url for each stream for this game
         streamers_data = get_twitch_api_data(
@@ -101,6 +102,7 @@ def get_games_list():
             id=game_id,
             defaults={
                 "name": game_name,
+                "box_art_url": game_box_art_url,
                 "streamers": json.dumps(streamers)
             }
         )

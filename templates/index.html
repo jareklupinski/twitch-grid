@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Twitch Grid</title>
+</head>
+<body>
+    {{ game_list|length }} different games currently being streamed:
+    <table>
+    {% for game in game_list %}
+        <tr>
+            <td>{{ game.name }}</td>
+            {% for streamer in game.streamers %}
+                <td class="game"><a href="{{ streamer.url }}">{{ streamer.viewer_count }}</a></td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+</body>
+</html>

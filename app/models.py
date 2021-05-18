@@ -13,3 +13,6 @@ class Game(models.Model):
     box_art_url = models.URLField()
     streamers = models.JSONField()
     # streamers = models.ManyToManyField('Streamer', related_name='games')
+
+    def __str__(self):
+        return self.name
