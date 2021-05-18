@@ -94,7 +94,7 @@ async def async_get_twitch_api_data(url: str, token: str, session, game_id=None,
     return data
 
 
-def get_streamer_list(game, session, twitch_oauth_token):
+async def get_streamer_list(game, session, twitch_oauth_token):
     game_id = game.get("id")
     game_name = game.get("name")
     game_box_art_url = game.get("box_art_url")
@@ -102,7 +102,7 @@ def get_streamer_list(game, session, twitch_oauth_token):
     total_viewers = 0
     # Get the streamers viewer count and url for each stream for this game
     # Set paginate to True to get more than 100 streamers per game if they exist
-    streamers_data = async_get_twitch_api_data(
+    streamers_data = await async_get_twitch_api_data(
         url="https://api.twitch.tv/helix/streams",
         game_id=game_id,
         token=twitch_oauth_token,
@@ -157,7 +157,7 @@ async def get_games_list():
     # get_streamer_list(game, twitch_oauth_token)
     async with aiohttp.ClientSession() as session:
         for game in twitch_games:
-            get_streamer_list(game, session, twitch_oauth_token)
+            await get_streamer_list(game, session, twitch_oauth_token)
 
     print("Deleting Old Games")
     game_ids = []
