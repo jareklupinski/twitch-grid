@@ -30,24 +30,21 @@ td a:hover {
 
 .viewer_count {
     position: absolute;
-    bottom: 3px;
+    bottom: 5px;
     right: 3px;
 }
 
-.game_container {
+.centered {
     overflow: hidden;
     text-overflow: ellipsis;
     word-wrap: break-word;
-    display: block;
-    line-height: 1em; /* a */
-    max-height: 4em; /* a x number of line to show (ex : 2 line)  */
-}
-
-.centered {
+    line-height: 1em;
+    max-height: 4em;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    width: 70px;
 }
 
 .stream_thumbnail {
