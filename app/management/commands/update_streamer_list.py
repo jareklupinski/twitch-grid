@@ -75,9 +75,11 @@ def get_games_list():
             token=twitch_oauth_token
         )
         for streamer in streamers_data:
+            user_id = streamer.get("user_id")
             user_name = streamer.get("user_name")
             viewer_count = streamer.get("viewer_count")
             new_streamer = Streamer.objects.update_or_create(
+                id=user_id,
                 url=f"https://www.twitch.tv/{user_name}",
                 viewer_count=viewer_count
             )

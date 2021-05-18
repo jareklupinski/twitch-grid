@@ -2,7 +2,8 @@ from django.db import models
 
 
 class Streamer(models.Model):
-    url = models.URLField(primary_key=True)
+    id = models.IntegerField(primary_key=True)
+    url = models.URLField()
     viewer_count = models.IntegerField()
 
 
