@@ -121,9 +121,9 @@ class Command(BaseCommand):
     help = 'Updates all Games and Streamers in the database'
 
     def handle(self, *args, **options):
-        t0 = time.clock()
+        t0 = time.process_time()
         get_games_list()
-        t1 = (time.clock() - t0) / 60
+        t1 = (time.process_time() - t0) / 60
         # is this java
         self.stdout.write(self.style.SUCCESS(f"Successfully got all Games and Streamers, took {t1} minutes"))
         return
