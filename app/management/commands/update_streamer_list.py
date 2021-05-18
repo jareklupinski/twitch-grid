@@ -235,7 +235,7 @@ async def async_get_streamer_list(game, session, twitch_oauth_token):
     #         "total_viewers": total_viewers
     #     }
     # )
-    print(f"Got {game.name} Streams, {total_viewers} total viewers")
+    print(f"Got {game_name} Streams, {total_viewers} total viewers")
 
 
 async def get_games_list():
@@ -258,11 +258,11 @@ async def get_games_list():
     for game in twitch_games:
         game_id = game.get("id")
         game_ids.append(game_id)
-    old_games = Game.objects.exclude(id__in=game_ids)
+    old_games = await sync_to_async(Game.objects.exclude)(id__in=game_ids)
     for game in old_games:
         game.delete()
     print("Setting timestamp")
-    Process.objects.update_or_create(
+    await sync_to_async(Process.objects.update_or_create)(
         name="game_list_update",
         defaults={
             "updated_at": timezone.now()
