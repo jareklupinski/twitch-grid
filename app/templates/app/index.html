@@ -1,3 +1,4 @@
+{% load fill_in_dimensions %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,9 +19,9 @@
     <table>
     {% for game in page_obj %}
         <tr>
-            <td><img src="{{ game.box_art_url }}" alt="{{ game.name }}" width="70" height="70"></td>
+            <td><img src="{{ game.box_art_url | fill_in_dimensions }}" alt="{{ game.name }}" width="70" height="70"></td>
             {% for streamer in game.streamers %}
-                <td class="game"><a href="{{ streamer.url }}"><img src="{{ streamer.thumbnail_url }}" alt="{{ streamer.viewer_count }}" width="70" height="70"></a></td>
+                <td class="game"><a href="{{ streamer.url }}"><img src="{{ streamer.thumbnail_url | fill_in_dimensions  }}" alt="{{ streamer.viewer_count }}" width="70" height="70"></a></td>
             {% endfor %}
         </tr>
     {% endfor %}
