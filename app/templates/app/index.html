@@ -11,15 +11,15 @@
     <table>
     {% for game in page_obj %}
         <tr>
-            <td>
+            <td class="game_thumbnail">
                 <img src="{{ game.box_art_url | fill_height_width }}" alt="{{ game.name }}" width="70" height="70">
                 <div class="centered">{{ game.name }}</div>
             </td>
             {% for streamer in game.streamers %}
-                <td class="game">
+                <td class="stream_thumbnail">
                     <a href="{{ streamer.url }}">
                         <img src="{{ streamer.thumbnail_url | fill_height_width }}" alt="{{ streamer.viewer_count }}" width="70" height="70">
-                        <div class="centered">{{ streamer.viewer_count }}</div>
+                        <div class="viewer_count">{{ streamer.viewer_count }}</div>
                     </a>
                 </td>
             {% endfor %}
