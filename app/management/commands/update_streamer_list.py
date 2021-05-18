@@ -249,7 +249,9 @@ async def get_games_list():
     )
     print("Getting Streamers for Top Games")
     # get_streamer_list(game, twitch_oauth_token)
-    async with aiohttp.ClientSession() as session:
+    conn = aiohttp.TCPConnector(limit=2)
+    session = aiohttp.ClientSession(connector=conn)
+    async with session:
         await asyncio.gather(
             *[async_get_streamer_list(game, session, twitch_oauth_token) for game in twitch_games]
         )
