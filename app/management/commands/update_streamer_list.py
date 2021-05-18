@@ -91,7 +91,7 @@ async def async_get_twitch_api_data(url: str, token: str, session, game_id=None,
                 "after": cursor,
                 "game_id": game_id
             }
-        async with session.get(url=url, headers=headers, params=params) as response:
+        async with session.get(url=url, headers=headers, params=params, timeout=0) as response:
             response_data = await response.json()
             rate_limit_remaining_string = response.headers.get("Ratelimit-Remaining")
             if rate_limit_remaining_string is not None:
@@ -209,7 +209,7 @@ async def get_games_list():
     print("Getting Streamers for Top Games")
     # get_streamer_list(game, twitch_oauth_token)
     conn = aiohttp.TCPConnector(limit=2)
-    session = aiohttp.ClientSession(connector=conn, timeout=0)
+    session = aiohttp.ClientSession(connector=conn)
     async with session:
         await asyncio.gather(
             *[async_get_streamer_list(game, session, twitch_oauth_token) for game in twitch_games]
