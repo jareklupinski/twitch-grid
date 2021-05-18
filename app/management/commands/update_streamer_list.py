@@ -91,7 +91,7 @@ def get_games_list():
 class Command(BaseCommand):
     help = 'Updates all Games and Streamers in the database'
 
-    def handle(self):
+    def handle(self, *args, **options):
         get_games_list()
         # is this java
         self.stdout.write(self.style.SUCCESS('Successfully got all Games and Streamers'))
