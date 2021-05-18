@@ -86,7 +86,7 @@ def get_games_list():
             user_name = streamer.get("user_name")
             viewer_count = streamer.get("viewer_count")
             thumbnail_url = streamer.get("thumbnail_url")
-            type = streamer.get("type")
+            stream_type = streamer.get("type")
             started_at = streamer.get("started_at")
             # user_id = streamer.get("user_id")
             # new_streamer, _ = Streamer.objects.update_or_create(
@@ -97,7 +97,7 @@ def get_games_list():
             #         "thumbnail_url": thumbnail_url
             #     }
             # )
-            print(f"{user_name} {viewer_count} {type} {started_at}")
+            print(f"{user_name} {viewer_count} {stream_type} {started_at}")
             new_streamer = {
                 "url": f"https://www.twitch.tv/{user_name}",
                 "viewer_count": viewer_count,
