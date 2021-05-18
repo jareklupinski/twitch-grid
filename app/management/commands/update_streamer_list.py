@@ -208,20 +208,16 @@ async def get_games_list():
     )
     print("Getting Streamers for Top Games")
     # get_streamer_list(game, twitch_oauth_token)
-    conn = aiohttp.TCPConnector(limit=1)
-    session = aiohttp.ClientSession(connector=conn)
+    conn = aiohttp.TCPConnector(limit=2)
+    session = aiohttp.ClientSession(connector=conn, timeout=0)
     async with session:
         await asyncio.gather(
             *[async_get_streamer_list(game, session, twitch_oauth_token) for game in twitch_games]
         )
     print("Deleting Old Games")
-    game_ids = []
-    for game in twitch_games:
-        game_id = game.get("id")
-        game_ids.append(game_id)
+    game_ids = [game.get("id") for game in twitch_games]
     old_games = await sync_to_async(Game.objects.exclude)(id__in=game_ids)
-    for game in old_games:
-        game.delete()
+    old_games.delete()
     print("Setting timestamp")
     await sync_to_async(Process.objects.update_or_create)(
         name="game_list_update",
