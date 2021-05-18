@@ -23,6 +23,8 @@ def get_twitch_api_oauth_token():
     response = requests.post(url=url, params=params)
     response_data = json.loads(response.text)
     access_token = response_data.get("access_token")
+    if access_token is None:
+        print("Error getting access token!")
     return access_token
 
 
@@ -41,9 +43,11 @@ def get_twitch_api_data(url: str, game_id=None, paginate=False, cursor=None):
         }
         response = requests.get(url=url, headers=headers, params=params)
         response_data = json.loads(response.text)
-        rate_limit_remaining = int(response.headers.get("Ratelimit-Remaining"))
-        if rate_limit_remaining < 799:
-            print(f"--------Rate limit falling: f{rate_limit_remaining}")
+        rate_limit_remaining_string = response.headers.get("Ratelimit-Remaining")
+        if rate_limit_remaining_string is not None:
+            rate_limit_remaining = int(rate_limit_remaining_string)
+            if rate_limit_remaining < 799:
+                print(f"--------Rate limit falling: f{rate_limit_remaining}")
         json_data = response_data.get("data")
         for entry in json_data:
             data.append(entry)
