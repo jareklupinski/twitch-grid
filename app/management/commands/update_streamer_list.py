@@ -79,6 +79,11 @@ async def async_get_twitch_api_data(url: str, token: str, session, game_id=None,
                 "first": 100,
                 "after": cursor,
             }
+        elif cursor is None:
+            params = {
+                "first": 100,
+                "game_id": game_id
+            }
         else:
             params = {
                 "first": 100,
