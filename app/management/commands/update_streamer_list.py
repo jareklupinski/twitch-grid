@@ -86,7 +86,7 @@ def get_games_list():
             user_name = streamer.get("user_name")
             viewer_count = streamer.get("viewer_count")
             thumbnail_url = streamer.get("thumbnail_url")
-            type = streamer.get("thumbnail_url")
+            type = streamer.get("type")
             started_at = streamer.get("started_at")
             # user_id = streamer.get("user_id")
             # new_streamer, _ = Streamer.objects.update_or_create(
