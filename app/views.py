@@ -9,4 +9,4 @@ def index(request):
     print("got games")
     context = {'game_list': game_list}
     print("got context")
-    return render(request, 'index.html', context)
+    return render(request, 'app/index.html', context)
