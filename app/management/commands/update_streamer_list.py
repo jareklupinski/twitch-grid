@@ -94,7 +94,7 @@ def async_get_twitch_api_data(url: str, token: str, session, game_id=None, pagin
     return data
 
 
-def get_streamer_list(game, session, twitch_oauth_token):
+def get_streamer_list(game, twitch_oauth_token):
     game_id = game.get("id")
     game_name = game.get("name")
     game_box_art_url = game.get("box_art_url")
@@ -102,12 +102,11 @@ def get_streamer_list(game, session, twitch_oauth_token):
     total_viewers = 0
     # Get the streamers viewer count and url for each stream for this game
     # Set paginate to True to get more than 100 streamers per game if they exist
-    streamers_data = await async_get_twitch_api_data(
+    streamers_data = get_twitch_api_data(
         url="https://api.twitch.tv/helix/streams",
         game_id=game_id,
         token=twitch_oauth_token,
-        paginate=False,
-        session=session
+        paginate=False
     )
     for streamer in streamers_data:
         user_name = streamer.get("user_name")
@@ -192,8 +191,6 @@ async def async_get_streamer_list(games, twitch_oauth_token):
             # new_game.streamers.set(streamers)
             # new_game.save()
             print(f"Got {new_game.name} Streams, {total_viewers} total viewers")
-            async_get_twitch_api_data()
-            await get_streamer_list(game, session, twitch_oauth_token)
 
 
 def get_games_list():
