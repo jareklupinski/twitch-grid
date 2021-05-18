@@ -104,21 +104,21 @@ async def async_get_streamer_list(game, session, twitch_oauth_token):
 
 
 async def get_games_list():
+    conn = aiohttp.TCPConnector(limit=1)
+    session = aiohttp.ClientSession(connector=conn, timeout=0.0)
     print("Getting OAuth Token")
     twitch_oauth_token = get_twitch_api_oauth_token()
     print("Getting Top Twitch Games")
     twitch_games = await async_get_twitch_api_data(
         url="https://api.twitch.tv/helix/games/top",
         paginate=True,
-        token=twitch_oauth_token
+        token=twitch_oauth_token,
+        session=session
     )
     print("Getting Streamers for Top Games")
-    conn = aiohttp.TCPConnector(limit=1)
-    session = aiohttp.ClientSession(connector=conn, timeout=0.0)
-    async with session:
-        await asyncio.gather(
-            *[async_get_streamer_list(game, session, twitch_oauth_token) for game in twitch_games]
-        )
+    await asyncio.gather(
+        *[async_get_streamer_list(game, session, twitch_oauth_token) for game in twitch_games]
+    )
     print("Deleting Old Games")
     game_ids = [game.get("id") for game in twitch_games]
     await sync_to_async(Game.objects.delete.exclude)(id__in=game_ids)
