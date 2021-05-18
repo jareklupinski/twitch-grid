@@ -17,7 +17,7 @@
             </td>
             {% for streamer in game.streamers %}
                 <td>
-                    <a href="{{ streamer.url }}">
+                    <a href="{{ streamer.url }}" target="_blank" rel="noopener noreferrer">
                         <img src="{{ streamer.thumbnail_url | fill_height_width }}" alt="{{ streamer.viewer_count }}" class="stream_thumbnail">
                         <div class="viewer_count">{{ streamer.viewer_count }}</div>
                     </a>
