@@ -80,13 +80,17 @@ def get_games_list():
             viewer_count = streamer.get("viewer_count")
             new_streamer = Streamer.objects.update_or_create(
                 id=user_id,
-                url=f"https://www.twitch.tv/{user_name}",
-                viewer_count=viewer_count
+                defaults={
+                    "url": f"https://www.twitch.tv/{user_name}",
+                    "viewer_count": viewer_count
+                }
             )
             streamers.append(new_streamer)
         new_game = Game.objects.get_or_create(
             id=game_id,
-            name=game_name
+            defaults={
+                "name": game_name
+            }
         )
         new_game.streamers = streamers
         new_game.save()
