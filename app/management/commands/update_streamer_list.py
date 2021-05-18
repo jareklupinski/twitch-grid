@@ -107,13 +107,14 @@ def get_games_list():
             defaults={
                 "name": game_name,
                 "box_art_url": game_box_art_url,
-                "streamers": streamers,
+                # "streamers": streamers,
                 "total_viewers": total_viewers
             }
         )
+        new_game.streamers = streamers
         # new_game.streamers.set(streamers)
-        # new_game.save()
-        print(new_game.name)
+        new_game.save()
+        print(f"{new_game.name} {new_game.streamers[0]}")
     # Remove Games no longer listed
     print("Deleting Old Games")
     old_games = Game.objects.exclude(id__in=game_ids)
