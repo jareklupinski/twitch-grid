@@ -86,8 +86,6 @@ def get_games_list():
             user_name = streamer.get("user_name")
             viewer_count = streamer.get("viewer_count")
             thumbnail_url = streamer.get("thumbnail_url")
-            stream_type = streamer.get("type")
-            started_at = streamer.get("started_at")
             # user_id = streamer.get("user_id")
             # new_streamer, _ = Streamer.objects.update_or_create(
             #     id=user_id,
@@ -97,7 +95,6 @@ def get_games_list():
             #         "thumbnail_url": thumbnail_url
             #     }
             # )
-            print(f"{user_name} {viewer_count} {stream_type} {started_at}")
             new_streamer = {
                 "url": f"https://www.twitch.tv/{user_name}",
                 "viewer_count": viewer_count,
@@ -105,19 +102,17 @@ def get_games_list():
             }
             streamers.append(new_streamer)
             total_viewers += viewer_count
-        new_game, _ = Game.objects.get_or_create(
+        new_game, _ = Game.objects.update_or_create(
             id=game_id,
             defaults={
                 "name": game_name,
                 "box_art_url": game_box_art_url,
-                # "streamers": streamers,
+                "streamers": streamers,
                 "total_viewers": total_viewers
             }
         )
-        new_game.streamers = streamers
         # new_game.streamers.set(streamers)
-        new_game.save()
-        print(f"{new_game.name} {new_game.streamers[0]}")
+        # new_game.save()
     # Remove Games no longer listed
     print("Deleting Old Games")
     old_games = Game.objects.exclude(id__in=game_ids)
