@@ -4,6 +4,7 @@ import requests
 import time
 
 import aiohttp
+from aiohttp import ClientTimeout
 import asyncio
 from asgiref.sync import sync_to_async
 from django.core.management.base import BaseCommand
@@ -208,8 +209,8 @@ async def get_games_list():
     )
     print("Getting Streamers for Top Games")
     # get_streamer_list(game, twitch_oauth_token)
-    conn = aiohttp.TCPConnector(limit=2)
-    session = aiohttp.ClientSession(connector=conn)
+    conn = aiohttp.TCPConnector(limit=1)
+    session = aiohttp.ClientSession(connector=conn, timeout=0.0)
     async with session:
         await asyncio.gather(
             *[async_get_streamer_list(game, session, twitch_oauth_token) for game in twitch_games]
