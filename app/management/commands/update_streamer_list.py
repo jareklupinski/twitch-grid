@@ -75,6 +75,7 @@ def get_games_list():
         game_name = game.get("name")
         game_box_art_url = game.get("box_art_url")
         streamers = []
+        total_viewers = 0
         # Get the streamers viewer count and url for each stream for this game
         streamers_data = get_twitch_api_data(
             url="https://api.twitch.tv/helix/streams",
@@ -100,12 +101,14 @@ def get_games_list():
                 "thumbnail_url": thumbnail_url
             }
             streamers.append(new_streamer)
+            total_viewers += viewer_count
         new_game, _ = Game.objects.get_or_create(
             id=game_id,
             defaults={
                 "name": game_name,
                 "box_art_url": game_box_art_url,
-                "streamers": streamers
+                "streamers": streamers,
+                "total_viewers": total_viewers
             }
         )
         # new_game.streamers.set(streamers)
@@ -113,8 +116,8 @@ def get_games_list():
         print(new_game.name)
     # Remove Games no longer listed
     print("Deleting Old Games")
-    db_games = Game.objects.exclude(id__in=game_ids)
-    for game in db_games:
+    old_games = Game.objects.exclude(id__in=game_ids)
+    for game in old_games:
         game.delete()
     # Set updated_at timestamp for process
     print("Setting timestamp")

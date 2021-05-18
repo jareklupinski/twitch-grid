@@ -17,6 +17,7 @@ class Game(models.Model):
     name = models.CharField(max_length=255)
     box_art_url = models.URLField()
     streamers = models.JSONField()
+    total_viewers = models.IntegerField()
     # streamers = models.ManyToManyField('Streamer', related_name='games')
 
     def __str__(self):
