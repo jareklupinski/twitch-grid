@@ -61,14 +61,16 @@ def get_twitch_api_data(url: str, token: str, game_id=None, paginate=False, curs
 
 
 def get_games_list():
+    print("Getting OAuth Token")
     twitch_oauth_token = get_twitch_api_oauth_token()
-    # Get top games currently streaming on Twitch
+    print("Getting Top Twitch Games")
     twitch_games = get_twitch_api_data(
         url="https://api.twitch.tv/helix/games/top",
         paginate=True,
         token=twitch_oauth_token
     )
     game_ids = []
+    print("Getting Streamers for Top Games")
     for game in twitch_games:
         game_id = game.get("id")
         game_ids.append(game_id)
@@ -77,10 +79,12 @@ def get_games_list():
         streamers = []
         total_viewers = 0
         # Get the streamers viewer count and url for each stream for this game
+        # Set paginate to True to get more than 100 streamers per game if they exist
         streamers_data = get_twitch_api_data(
             url="https://api.twitch.tv/helix/streams",
             game_id=game_id,
-            token=twitch_oauth_token
+            token=twitch_oauth_token,
+            paginate=False
         )
         for streamer in streamers_data:
             user_name = streamer.get("user_name")
@@ -113,12 +117,11 @@ def get_games_list():
         )
         # new_game.streamers.set(streamers)
         # new_game.save()
-    # Remove Games no longer listed
+        print(f"Got {new_game.name} Streams, {viewer_count} total viewers")
     print("Deleting Old Games")
     old_games = Game.objects.exclude(id__in=game_ids)
     for game in old_games:
         game.delete()
-    # Set updated_at timestamp for process
     print("Setting timestamp")
     Process.objects.update_or_create(
         name="game_list_update",
@@ -132,8 +135,11 @@ class Command(BaseCommand):
     help = 'Updates all Games and Streamers in the database'
 
     def handle(self, *args, **options):
+        print("Starting Command")
         t0 = time.process_time()
+        print("Getting Games List")
         get_games_list()
+        print("Finished Getting Games List")
         t1 = (time.process_time() - t0) / 60
         # is this java
         self.stdout.write(self.style.SUCCESS(f"Successfully got all Games and Streamers, took {t1} minutes"))
