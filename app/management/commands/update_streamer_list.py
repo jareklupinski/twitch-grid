@@ -197,7 +197,7 @@ async def async_get_streamer_list(games, twitch_oauth_token):
                 }
                 streamers.append(new_streamer)
                 total_viewers += viewer_count
-            new_game, _ = sync_to_async(Game.objects.update_or_create)(
+            new_game, _ = await sync_to_async(Game.objects.update_or_create)(
                 id=game_id,
                 defaults={
                     "name": game_name,
