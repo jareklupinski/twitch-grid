@@ -11,14 +11,14 @@
     <table>
     {% for game in page_obj %}
         <tr>
-            <td class="game_thumbnail">
-                <img src="{{ game.box_art_url | fill_height_width }}" alt="{{ game.name }}" width="70" height="70">
+            <td class="game_container">
+                <img src="{{ game.box_art_url | fill_height_width }}" alt="{{ game.name }}" class="game_thumbnail">
                 <div class="centered">{{ game.name }}</div>
             </td>
             {% for streamer in game.streamers %}
-                <td class="stream_thumbnail">
+                <td>
                     <a href="{{ streamer.url }}">
-                        <img src="{{ streamer.thumbnail_url | fill_height_width }}" alt="{{ streamer.viewer_count }}" width="70" height="70">
+                        <img src="{{ streamer.thumbnail_url | fill_height_width }}" alt="{{ streamer.viewer_count }}" class="stream_thumbnail">
                         <div class="viewer_count">{{ streamer.viewer_count }}</div>
                     </a>
                 </td>
