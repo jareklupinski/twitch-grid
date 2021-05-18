@@ -86,7 +86,7 @@ def get_games_list():
                 }
             )
             streamers.append(new_streamer)
-        new_game = Game.objects.get_or_create(
+        new_game, _ = Game.objects.get_or_create(
             id=game_id,
             defaults={
                 "name": game_name
