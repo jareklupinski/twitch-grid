@@ -70,11 +70,22 @@ async def async_get_twitch_api_data(url: str, token: str, session, game_id=None,
     }
     while True:
         # The two API calls used here, Get Top Games and Get Streams, use these parameters without colliding
-        params = {
-            "first": 100,
-            "after": cursor,
-            "game_id": game_id
-        }
+        if game_id is None and cursor is None:
+            params = {
+                "first": 100,
+            }
+        elif game_id is None:
+            params = {
+                "first": 100,
+                "after": cursor,
+            }
+        else:
+            params = {
+                "first": 100,
+                "after": cursor,
+                "game_id": game_id
+            }
+        print(url)
         async with session.get(url=url, headers=headers, params=params) as response:
             response_data = await json.loads(response.text)
             rate_limit_remaining_string = response.headers.get("Ratelimit-Remaining")
