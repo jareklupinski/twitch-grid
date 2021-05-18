@@ -3,6 +3,8 @@ import os
 import requests
 import time
 
+import aiohttp
+import asyncio
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
@@ -60,7 +62,55 @@ def get_twitch_api_data(url: str, token: str, game_id=None, paginate=False, curs
     return data
 
 
-def get_games_list():
+async def get_streamer_list(game, twitch_oauth_token):
+    game_id = game.get("id")
+    game_name = game.get("name")
+    game_box_art_url = game.get("box_art_url")
+    streamers = []
+    total_viewers = 0
+    # Get the streamers viewer count and url for each stream for this game
+    # Set paginate to True to get more than 100 streamers per game if they exist
+    streamers_data = get_twitch_api_data(
+        url="https://api.twitch.tv/helix/streams",
+        game_id=game_id,
+        token=twitch_oauth_token,
+        paginate=False
+    )
+    for streamer in streamers_data:
+        user_name = streamer.get("user_name")
+        viewer_count = streamer.get("viewer_count")
+        thumbnail_url = streamer.get("thumbnail_url")
+        # user_id = streamer.get("user_id")
+        # new_streamer, _ = Streamer.objects.update_or_create(
+        #     id=user_id,
+        #     defaults={
+        #         "url": f"https://www.twitch.tv/{user_name}",
+        #         "viewer_count": viewer_count,
+        #         "thumbnail_url": thumbnail_url
+        #     }
+        # )
+        new_streamer = {
+            "url": f"https://www.twitch.tv/{user_name}",
+            "viewer_count": viewer_count,
+            "thumbnail_url": thumbnail_url
+        }
+        streamers.append(new_streamer)
+        total_viewers += viewer_count
+    new_game, _ = Game.objects.update_or_create(
+        id=game_id,
+        defaults={
+            "name": game_name,
+            "box_art_url": game_box_art_url,
+            "streamers": streamers,
+            "total_viewers": total_viewers
+        }
+    )
+    # new_game.streamers.set(streamers)
+    # new_game.save()
+    print(f"Got {new_game.name} Streams, {total_viewers} total viewers")
+
+
+async def get_games_list():
     print("Getting OAuth Token")
     twitch_oauth_token = get_twitch_api_oauth_token()
     print("Getting Top Twitch Games")
@@ -69,56 +119,19 @@ def get_games_list():
         paginate=True,
         token=twitch_oauth_token
     )
-    game_ids = []
     print("Getting Streamers for Top Games")
+
+    # get_streamer_list(game, twitch_oauth_token)
+
+    await asyncio.gather(
+        *[get_streamer_list(game, twitch_oauth_token) for game in twitch_games]
+    )
+
+    print("Deleting Old Games")
+    game_ids = []
     for game in twitch_games:
         game_id = game.get("id")
         game_ids.append(game_id)
-        game_name = game.get("name")
-        game_box_art_url = game.get("box_art_url")
-        streamers = []
-        total_viewers = 0
-        # Get the streamers viewer count and url for each stream for this game
-        # Set paginate to True to get more than 100 streamers per game if they exist
-        streamers_data = get_twitch_api_data(
-            url="https://api.twitch.tv/helix/streams",
-            game_id=game_id,
-            token=twitch_oauth_token,
-            paginate=False
-        )
-        for streamer in streamers_data:
-            user_name = streamer.get("user_name")
-            viewer_count = streamer.get("viewer_count")
-            thumbnail_url = streamer.get("thumbnail_url")
-            # user_id = streamer.get("user_id")
-            # new_streamer, _ = Streamer.objects.update_or_create(
-            #     id=user_id,
-            #     defaults={
-            #         "url": f"https://www.twitch.tv/{user_name}",
-            #         "viewer_count": viewer_count,
-            #         "thumbnail_url": thumbnail_url
-            #     }
-            # )
-            new_streamer = {
-                "url": f"https://www.twitch.tv/{user_name}",
-                "viewer_count": viewer_count,
-                "thumbnail_url": thumbnail_url
-            }
-            streamers.append(new_streamer)
-            total_viewers += viewer_count
-        new_game, _ = Game.objects.update_or_create(
-            id=game_id,
-            defaults={
-                "name": game_name,
-                "box_art_url": game_box_art_url,
-                "streamers": streamers,
-                "total_viewers": total_viewers
-            }
-        )
-        # new_game.streamers.set(streamers)
-        # new_game.save()
-        print(f"Got {new_game.name} Streams, {total_viewers} total viewers")
-    print("Deleting Old Games")
     old_games = Game.objects.exclude(id__in=game_ids)
     for game in old_games:
         game.delete()
@@ -138,7 +151,9 @@ class Command(BaseCommand):
         print("Starting Command")
         t0 = time.process_time()
         print("Getting Games List")
-        get_games_list()
+        # get_games_list()
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(get_games_list())
         print("Finished Getting Games List")
         t1 = (time.process_time() - t0) / 60
         # is this java
