@@ -10,8 +10,6 @@ from app.models import Game, Streamer
 TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID")
 TWITCH_APP_ACCESS_TOKEN = os.environ.get("TWITCH_APP_ACCESS_TOKEN")
 
-twitch_oauth_token = ""
-
 
 def get_twitch_api_oauth_token():
     url = "https://id.twitch.tv/oauth2/token"
@@ -23,14 +21,13 @@ def get_twitch_api_oauth_token():
     response = requests.post(url=url, params=params)
     response_data = json.loads(response.text)
     access_token = response_data.get("access_token")
-    print(access_token)
     return access_token
 
 
-def get_twitch_api_data(url: str, game_id=None, paginate=False, cursor=None):
+def get_twitch_api_data(url: str, token: str, game_id=None, paginate=False, cursor=None):
     data = []
     headers = {
-        "Authorization": f"Bearer {twitch_oauth_token}",
+        "Authorization": f"Bearer {token}",
         "Client-Id": TWITCH_CLIENT_ID
     }
     while True:
@@ -60,10 +57,12 @@ def get_twitch_api_data(url: str, game_id=None, paginate=False, cursor=None):
 
 
 def get_games_list():
+    twitch_oauth_token = get_twitch_api_oauth_token()
     # Get top 3000 games currently streaming on Twitch
     games = get_twitch_api_data(
         url="https://api.twitch.tv/helix/games/top",
-        paginate=True
+        paginate=True,
+        token=twitch_oauth_token
     )
     for game in games:
         game_id = game.get("id")
@@ -72,7 +71,8 @@ def get_games_list():
         # Get the streamers viewer count and url for each stream for this game
         streamers_data = get_twitch_api_data(
             url="https://api.twitch.tv/helix/streams",
-            game_id=game_id
+            game_id=game_id,
+            token=twitch_oauth_token
         )
         for streamer in streamers_data:
             user_name = streamer.get("user_name")
