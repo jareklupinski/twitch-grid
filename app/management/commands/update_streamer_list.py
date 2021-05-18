@@ -1,10 +1,7 @@
-import json
 import os
-import requests
 import time
 
 import aiohttp
-from aiohttp import ClientTimeout
 import asyncio
 from asgiref.sync import sync_to_async
 from django.core.management.base import BaseCommand
@@ -19,20 +16,20 @@ TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID")
 TWITCH_APP_ACCESS_TOKEN = os.environ.get("TWITCH_APP_ACCESS_TOKEN")
 
 
-def get_twitch_api_oauth_token():
+async def get_twitch_api_oauth_token(session):
     url = "https://id.twitch.tv/oauth2/token"
     params = {
         "client_id": TWITCH_CLIENT_ID,
         "client_secret": TWITCH_APP_ACCESS_TOKEN,
         "grant_type": "client_credentials"
     }
-    response = requests.post(url=url, params=params)
-    response_data = json.loads(response.text)
-    access_token = response_data.get("access_token")
-    return access_token
+    async with session.post(url=url, params=params, timeout=0) as response:
+        response_data = await response.json()
+        access_token = response_data.get("access_token")
+        return access_token
 
 
-async def async_get_twitch_api_data(url: str, token: str, session, game_id="", paginate=False, cursor=""):
+async def get_twitch_api_data(url: str, token: str, session, game_id="", paginate=False, cursor=""):
     data = []
     headers = {
         "Authorization": f"Bearer {token}",
@@ -60,11 +57,10 @@ async def async_get_twitch_api_data(url: str, token: str, session, game_id="", p
             if pagination is not None:
                 cursor = pagination.get("cursor")
             if cursor is None or paginate is False:
-                break
-    return data
+                return data
 
 
-async def async_get_streamer_list(game, session, twitch_oauth_token):
+async def get_streamer_list(game, session, twitch_oauth_token):
     game_id = game.get("id")
     game_name = game.get("name")
     game_box_art_url = game.get("box_art_url")
@@ -72,7 +68,7 @@ async def async_get_streamer_list(game, session, twitch_oauth_token):
     total_viewers = 0
     # Get the streamers viewer count and url for each stream for this game
     # Set paginate to True to get more than 100 streamers per game if they exist
-    streamers_data = await async_get_twitch_api_data(
+    streamers_data = await get_twitch_api_data(
         url="https://api.twitch.tv/helix/streams",
         game_id=game_id,
         token=twitch_oauth_token,
@@ -107,9 +103,11 @@ async def get_games_list():
     conn = aiohttp.TCPConnector(limit=1)
     session = aiohttp.ClientSession(connector=conn, timeout=0.0)
     print("Getting OAuth Token")
-    twitch_oauth_token = get_twitch_api_oauth_token()
+    twitch_oauth_token = await get_twitch_api_oauth_token(
+        session=session
+    )
     print("Getting Top Twitch Games")
-    twitch_games = await async_get_twitch_api_data(
+    twitch_games = await get_twitch_api_data(
         url="https://api.twitch.tv/helix/games/top",
         paginate=True,
         token=twitch_oauth_token,
@@ -117,11 +115,12 @@ async def get_games_list():
     )
     print("Getting Streamers for Top Games")
     await asyncio.gather(
-        *[async_get_streamer_list(game, session, twitch_oauth_token) for game in twitch_games]
+        *[get_streamer_list(game, session, twitch_oauth_token) for game in twitch_games]
     )
     print("Deleting Old Games")
     game_ids = [game.get("id") for game in twitch_games]
-    await sync_to_async(Game.objects.delete.exclude)(id__in=game_ids)
+    old_games = await sync_to_async(Game.objects.exclude)(id__in=game_ids)
+    await sync_to_async(old_games.delete)()
     print("Setting timestamp")
     await sync_to_async(Process.objects.update_or_create)(
         name="game_list_update",
