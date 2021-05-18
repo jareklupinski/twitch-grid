@@ -1,50 +1,11 @@
+{% load static %}
 {% load fill_in_dimensions %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Twitch Game Matrix</title>
-    <style>
-        table {
-            width: 100%;
-        }
-
-        td {
-            height: 70px;
-            width: 70px;
-            position: relative;
-            color: white;
-            text-shadow: 2px 0 rgba(0.1, 0.1, 0.1, 0.5);
-            text-align: center;
-        }
-
-        td a:link {
-            color: white;
-            background-color: transparent;
-            text-decoration: none;
-            text-shadow: 2px 0 rgba(0.1, 0.1, 0.1, 0.9);
-        }
-
-        td a:visited {
-            color: white;
-            background-color: transparent;
-            text-decoration: none;
-            text-shadow: 2px 0 rgba(0.1, 0.1, 0.1, 0.9);
-        }
-
-        td a:hover {
-            color: red;
-            background-color: transparent;
-            text-decoration: none;
-            text-shadow: 2px 0 rgba(0.1, 0.1, 0.1, 0.9);
-        }
-
-        .centered {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{% static 'app/style.css' %}">
 </head>
 <body>
     {{ game_total }} different games being streamed at {{ update_time }} GMT
