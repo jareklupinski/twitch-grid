@@ -238,7 +238,7 @@ async def async_get_streamer_list(game, session, twitch_oauth_token):
     print(f"Got {game.name} Streams, {total_viewers} total viewers")
 
 
-def get_games_list():
+async def get_games_list():
     print("Getting OAuth Token")
     twitch_oauth_token = get_twitch_api_oauth_token()
     print("Getting Top Twitch Games")
@@ -249,7 +249,7 @@ def get_games_list():
     )
     print("Getting Streamers for Top Games")
     # get_streamer_list(game, twitch_oauth_token)
-    with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession() as session:
         await asyncio.gather(
             *[async_get_streamer_list(game, session, twitch_oauth_token) for game in twitch_games]
         )
@@ -277,7 +277,7 @@ class Command(BaseCommand):
         print("Starting Command")
         t0 = time.process_time()
         print("Getting Games List")
-        get_games_list()
+        asyncio.run(get_games_list())
         print("Finished Getting Games List")
         t1 = (time.process_time() - t0) / 60
         # is this java
