@@ -62,7 +62,39 @@ def get_twitch_api_data(url: str, token: str, game_id=None, paginate=False, curs
     return data
 
 
-async def get_streamer_list(game, twitch_oauth_token):
+async def async_get_twitch_api_data(url: str, token: str, session, game_id=None, paginate=False, cursor=None):
+    data = []
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Client-Id": TWITCH_CLIENT_ID
+    }
+    while True:
+        # The two API calls used here, Get Top Games and Get Streams, use these parameters without colliding
+        params = {
+            "first": 100,
+            "after": cursor,
+            "game_id": game_id
+        }
+        async with session.get(url=url, headers=headers, params=params) as response:
+            response_data = await response.json()
+        rate_limit_remaining_string = response.headers.get("Ratelimit-Remaining")
+        if rate_limit_remaining_string is not None:
+            rate_limit_remaining = int(rate_limit_remaining_string)
+            if rate_limit_remaining < 799:
+                print(f"--------Rate limit falling: f{rate_limit_remaining}")
+        json_data = response_data.get("data")
+        for entry in json_data:
+            data.append(entry)
+        pagination = response_data.get("pagination")
+        cursor = None
+        if pagination is not None:
+            cursor = pagination.get("cursor")
+        if cursor is None or paginate is False:
+            break
+    return data
+
+
+def get_streamer_list(game, session, twitch_oauth_token):
     game_id = game.get("id")
     game_name = game.get("name")
     game_box_art_url = game.get("box_art_url")
@@ -70,11 +102,12 @@ async def get_streamer_list(game, twitch_oauth_token):
     total_viewers = 0
     # Get the streamers viewer count and url for each stream for this game
     # Set paginate to True to get more than 100 streamers per game if they exist
-    streamers_data = get_twitch_api_data(
+    streamers_data = async_get_twitch_api_data(
         url="https://api.twitch.tv/helix/streams",
         game_id=game_id,
         token=twitch_oauth_token,
-        paginate=False
+        paginate=False,
+        session=session
     )
     for streamer in streamers_data:
         user_name = streamer.get("user_name")
@@ -122,10 +155,9 @@ async def get_games_list():
     print("Getting Streamers for Top Games")
 
     # get_streamer_list(game, twitch_oauth_token)
-
-    await asyncio.gather(
-        *[get_streamer_list(game, twitch_oauth_token) for game in twitch_games]
-    )
+    async with aiohttp.ClientSession() as session:
+        for game in twitch_games:
+            get_streamer_list(game, session, twitch_oauth_token)
 
     print("Deleting Old Games")
     game_ids = []
@@ -152,8 +184,7 @@ class Command(BaseCommand):
         t0 = time.process_time()
         print("Getting Games List")
         # get_games_list()
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(get_games_list())
+        asyncio.run(get_games_list())
         print("Finished Getting Games List")
         t1 = (time.process_time() - t0) / 60
         # is this java
