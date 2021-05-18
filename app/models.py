@@ -7,6 +7,11 @@ from django.db import models
 #     viewer_count = models.IntegerField()
 
 
+class Process(models.Model):
+    name = models.CharField(max_length=255, primary_key=True)
+    updated_at = models.TimeField()
+
+
 class Game(models.Model):
     id = models.BigIntegerField(primary_key=True)
     name = models.CharField(max_length=255)

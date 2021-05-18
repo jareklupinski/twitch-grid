@@ -1,12 +1,12 @@
-from dataclasses import dataclass
 import json
 import os
 import requests
 import time
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
+from django.utils import timezone
 
-from app.models import Game
+from app.models import Game, Process
 
 
 # add these to your Heroku -> Setting -> Config Vars using the same keys
@@ -68,8 +68,10 @@ def get_games_list():
         paginate=True,
         token=twitch_oauth_token
     )
+    game_ids = []
     for game in games:
         game_id = game.get("id")
+        game_ids.append(game_id)
         game_name = game.get("name")
         game_box_art_url = game.get("box_art_url")
         streamers = []
@@ -106,10 +108,18 @@ def get_games_list():
                 "streamers": streamers
             }
         )
+        Process.objects.update_or_create(
+            name="game_list_update",
+            defaults={
+                "updated_at": timezone.now()
+            }
+        )
         # new_game.streamers.set(streamers)
         # new_game.save()
         # Sanity check
         print(new_game.name)
+    # TODO
+    # delete Games not in game_id
 
 
 class Command(BaseCommand):
