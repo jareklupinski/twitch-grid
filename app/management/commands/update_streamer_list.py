@@ -63,13 +63,13 @@ def get_twitch_api_data(url: str, token: str, game_id=None, paginate=False, curs
 def get_games_list():
     twitch_oauth_token = get_twitch_api_oauth_token()
     # Get top games currently streaming on Twitch
-    games = get_twitch_api_data(
+    twitch_games = get_twitch_api_data(
         url="https://api.twitch.tv/helix/games/top",
         paginate=True,
         token=twitch_oauth_token
     )
     game_ids = []
-    for game in games:
+    for game in twitch_games:
         game_id = game.get("id")
         game_ids.append(game_id)
         game_name = game.get("name")
@@ -108,18 +108,19 @@ def get_games_list():
                 "streamers": streamers
             }
         )
-        Process.objects.update_or_create(
-            name="game_list_update",
-            defaults={
-                "updated_at": timezone.now()
-            }
-        )
         # new_game.streamers.set(streamers)
         # new_game.save()
-        # Sanity check
-        print(new_game.name)
-    # TODO
-    # delete Games not in game_id
+    # Remove Games no longer listed
+    db_games = Game.objects.exclude(id__in=game_ids)
+    for game in db_games:
+        game.delete()
+    # Set updated_at timestamp for process
+    Process.objects.update_or_create(
+        name="game_list_update",
+        defaults={
+            "updated_at": timezone.now()
+        }
+    )
 
 
 class Command(BaseCommand):

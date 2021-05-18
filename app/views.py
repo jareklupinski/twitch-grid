@@ -7,7 +7,7 @@ from app.models import Game, Process
 def index(request):
     games = Game.objects.all()
     process = Process.objects.get(name="game_list_update")
-    paginator = Paginator(games, 100)
+    paginator = Paginator(games, 1000)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
