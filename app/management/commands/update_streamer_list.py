@@ -84,11 +84,12 @@ def get_games_list():
                 viewer_count=viewer_count
             )
             streamers.append(new_streamer)
-        new_game = Game.objects.update_or_create(
+        new_game = Game.objects.get_or_create(
             id=game_id,
-            name=game_name,
-            streamers=streamers
+            name=game_name
         )
+        new_game.streamers = streamers
+        new_game.save()
         # Sanity check
         print(new_game.name)
 
