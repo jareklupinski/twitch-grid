@@ -9,4 +9,4 @@ class Streamer(models.Model):
 class Game(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
-    streamers = models.ManyToManyField(Streamer)
+    streamers = models.ManyToManyField('Streamer', related_name='games')
