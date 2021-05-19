@@ -97,7 +97,7 @@ async def get_streamer_list(game, session, twitch_oauth_token):
             "total_viewers": total_viewers
         }
     )
-    print(f"{new_game.name}: {total_viewers} total viewers")
+    # print(f"{new_game.name}: {total_viewers} total viewers")
 
 
 async def update_games_list(token):
