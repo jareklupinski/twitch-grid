@@ -12,13 +12,13 @@
     {% for game in page_obj %}
         <tr>
             <td>
-                <img src="{{ game.box_art_url | fill_height_width }}" alt="{{ game.name }}" class="game_thumbnail">
+                <img src="{{ game.box_art_url | fill_height_width }}" alt="{{ game.name }}" class="game_thumbnail" loading="eager">
                 <div class="centered">{{ game.name }}</div>
             </td>
             {% for streamer in game.streamers %}
                 <td>
                     <a href="{{ streamer.url }}" target="_blank" rel="noopener noreferrer">
-                        <img src="{{ streamer.thumbnail_url | fill_height_width }}" alt="{{ streamer.viewer_count }}" class="stream_thumbnail">
+                        <img src="{{ streamer.thumbnail_url | fill_height_width }}" alt="{{ streamer.viewer_count }}" class="stream_thumbnail" loading="lazy">
                         <div class="viewer_count">{{ streamer.viewer_count }}</div>
                     </a>
                 </td>
