@@ -49,7 +49,7 @@ async def get_twitch_api_data(url: str, token: str, session, game_id="", paginat
                 rate_limit_remaining = int(rate_limit_remaining_string)
                 if rate_limit_remaining < 799:
                     print(f"--------Rate limit falling: {rate_limit_remaining}")
-                if rate_limit_remaining < 699:
+                if rate_limit_remaining < 10:
                     print(f"--------Rate limit hit: {rate_limit_remaining}")
                     time.sleep(10)
             json_data = response_data.get("data")
