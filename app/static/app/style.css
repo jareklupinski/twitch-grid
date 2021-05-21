@@ -1,3 +1,7 @@
+.header {
+    float: right;
+}
+
 table {
     border-collapse: collapse;
     border-spacing: 0;
@@ -8,8 +12,8 @@ td {
     width: 70px;
     position: relative;
     color: white;
-    text-shadow: -1px 1px 2px #000, 1px 1px 2px #000, 1px -1px 2px #000, -1px -1px 2px #000;
-    text-align: center;
+    text-shadow: -2px 2px 2px #000, 2px 2px 2px #000, 2px -2px 2px #000, -2px -2px 2px #000;
+    text-align: left;
 }
 
 td a:link {
@@ -33,17 +37,14 @@ td a:hover {
     right: 3px;
 }
 
-.centered {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    word-wrap: break-word;
+.game_name {
+    pointer-events: none;
     line-height: 1em;
-    max-height: 4em;
+    max-height: 1em;
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 70px;
+    top: 5px;
+    left: 5px;
+    width: 1000px;
 }
 
 .stream_thumbnail {

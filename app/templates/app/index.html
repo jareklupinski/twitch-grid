@@ -7,13 +7,15 @@
     <link rel="stylesheet" type="text/css" href="{% static 'app/style.css' %}">
 </head>
 <body>
-    {{ game_total }} different games being streamed at {{ update_time }} GMT
+    <div class="header">
+        {{ game_total }} different games being streamed at {{ update_time }} GMT
+    </div>
     <table>
     {% for game in page_obj %}
         <tr>
             <td>
                 <img src="{{ game.box_art_url | fill_height_width }}" alt="{{ game.name }}" class="game_thumbnail" loading="eager">
-                <div class="centered">{{ game.name }}</div>
+                <div class="game_name">{{ game.name }}</div>
             </td>
             {% for streamer in game.streamers %}
                 <td>
