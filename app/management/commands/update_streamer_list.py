@@ -29,7 +29,7 @@ def get_twitch_api_oauth_token():
     return access_token
 
 
-async def get_twitch_api_data(url: str, token: str, session, game_id="", paginate=False, cursor=""):
+async def get_twitch_api_data(url: str, token: str, session, game_id="", paginate=False, cursor="", first=100):
     data = []
     headers = {
         "Authorization": f"Bearer {token}",
@@ -38,7 +38,7 @@ async def get_twitch_api_data(url: str, token: str, session, game_id="", paginat
     while True:
         # The two API calls used here, Get Top Games and Get Streams, use these parameters without colliding
         params = {
-            "first": 100,
+            "first": first,
             "after": cursor,
             "game_id": game_id
         }
@@ -77,7 +77,8 @@ async def get_streamer_list(game, session, twitch_oauth_token):
         game_id=game_id,
         token=twitch_oauth_token,
         paginate=False,
-        session=session
+        session=session,
+        first=50
     )
     for streamer in streamers:
         user_login = streamer.get("user_login")
