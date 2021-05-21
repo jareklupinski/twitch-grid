@@ -80,11 +80,11 @@ async def get_streamer_list(game, session, twitch_oauth_token):
         session=session
     )
     for streamer in streamers:
-        user_name = streamer.get("user_name")
+        user_login = streamer.get("user_login")
         viewer_count = streamer.get("viewer_count")
         thumbnail_url = streamer.get("thumbnail_url")
         new_streamer = {
-            "url": f"https://www.twitch.tv/{user_name}",
+            "url": f"https://www.twitch.tv/{user_login}",
             "viewer_count": viewer_count,
             "thumbnail_url": thumbnail_url
         }
