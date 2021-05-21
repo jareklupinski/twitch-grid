@@ -72,18 +72,25 @@ AUTH_PASSWORD_VALIDATORS = [
 
 django_heroku.settings(locals())
 
-servers = os.environ['MEMCACHIER_SERVERS']
-username = os.environ['MEMCACHIER_USERNAME']
-password = os.environ['MEMCACHIER_PASSWORD']
+servers = os.environ.get('MEMCACHIER_SERVERS')
+username = os.environ.get('MEMCACHIER_USERNAME')
+password = os.environ.get('MEMCACHIER_PASSWORD')
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_bmemcached.memcached.BMemcached',
-        'TIMEOUT': 300,  # s
-        'LOCATION': servers,
-        'OPTIONS': {
-            'username': username,
-            'password': password,
+if servers is not None:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_bmemcached.memcached.BMemcached',
+            'TIMEOUT': None,
+            'LOCATION': servers,
+            'OPTIONS': {
+                'username': username,
+                'password': password,
+            }
         }
     }
-}
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        }
+    }

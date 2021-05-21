@@ -8,8 +8,6 @@ from asgiref.sync import sync_to_async
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.core.cache import cache
-from django.http import HttpRequest
-from django.utils.cache import get_cache_key
 
 from app.models import Game, Process
 
@@ -126,17 +124,6 @@ async def update_games_list(token):
     await conn.close()
 
 
-def invalidate_cache():
-    request = HttpRequest()
-    request.path = "/"
-    key = get_cache_key(request)
-    if cache.has_key(key):
-        print(f"Deleting {key}")
-        cache.delete(key)
-    else:
-        print("No Cache Found!")
-
-
 class Command(BaseCommand):
     help = 'Updates all Games and Streamers in the database'
 
@@ -150,7 +137,7 @@ class Command(BaseCommand):
         print("Setting Timestamp")
         Process.objects.update_or_create(name="game_list_update", defaults={"updated_at": timezone.now()})
         print("Invalidating Cache")
-        invalidate_cache()
+        cache.clear()
         t1 = (time.time() - t0) / 60
         # is this java
         self.stdout.write(self.style.SUCCESS(f"Successfully got all Games and Streamers, took {t1:.2f} minutes"))
