@@ -14,8 +14,10 @@
     {% for game in page_obj %}
         <tr>
             <td>
-                <img src="{{ game.box_art_url | fill_height_width }}" alt="{{ game.name }}" class="game_thumbnail" loading="eager">
-                <div class="game_name">{{ game.name }}</div>
+                <a href="https://www.twitch.tv/directory/game/{{ game.name | urlencode }}" target="_blank" rel="noopener noreferrer">
+                    <img src="{{ game.box_art_url | fill_height_width }}" alt="{{ game.name }}" class="game_thumbnail" loading="eager">
+                    <div class="game_name">{{ game.name }}</div>
+                </a>
             </td>
             {% for streamer in game.streamers %}
                 <td>
