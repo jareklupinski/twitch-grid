@@ -49,9 +49,9 @@ async def get_twitch_api_data(url: str, token: str, session, game_id="", paginat
                 rate_limit_remaining = int(rate_limit_remaining_string)
                 if rate_limit_remaining < 799:
                     print(f"--------Rate limit falling: {rate_limit_remaining}")
-                if rate_limit_remaining < 10:
+                if rate_limit_remaining < 699:
                     print(f"--------Rate limit hit: {rate_limit_remaining}")
-                    await asyncio.sleep(10)
+                    time.sleep(10)
             json_data = response_data.get("data")
             for entry in json_data:
                 data.append(entry)
