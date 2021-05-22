@@ -109,7 +109,7 @@ async def get_streamer_list(game, session, twitch_oauth_token):
 
 
 async def update_games_list(token):
-    conn = aiohttp.TCPConnector(limit=1)  # raise this until Twitch's rate limiter starts complaining
+    conn = aiohttp.TCPConnector(limit=2)  # raise this until Twitch's rate limiter starts complaining
     session = aiohttp.ClientSession(connector=conn, timeout=0.0)
     print("Getting Top Games")
     games = await get_twitch_api_data(
