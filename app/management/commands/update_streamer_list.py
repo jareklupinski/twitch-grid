@@ -77,6 +77,7 @@ async def get_streamer_list(game, session, twitch_oauth_token):
     game_box_art_url = game.get("box_art_url")
     current_streamers = []
     total_viewers = 0
+    magic_number_viewers = 0
     # Get the streamers viewer count and url for each stream for this game
     # Set paginate to True to get more than 100 streamers per game if they exist
     streamers = await get_twitch_api_data(
@@ -99,9 +100,10 @@ async def get_streamer_list(game, session, twitch_oauth_token):
         }
         current_streamers.append(new_streamer)
         total_viewers += viewer_count
+        magic_number_viewers += viewer_count ** 3
 
-    # there's a lot I would do differently on a paid postgres tier; 10000 rows is all I get
-    magic_number = total_viewers / len(streamers)
+    # fiddling with the magic number calculation
+    magic_number = magic_number_viewers / len(streamers)
 
     new_game, _ = await sync_to_async(Game.objects.update_or_create)(
         id=game_id,
