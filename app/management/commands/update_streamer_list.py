@@ -49,8 +49,13 @@ async def get_twitch_api_data(url: str, token: str, session, game_id="", paginat
             if rate_limit_remaining_string is not None:
                 rate_limit_remaining = int(rate_limit_remaining_string)
                 if rate_limit_remaining < 10:
-                    print(f"Rate limit hit: {rate_limit_remaining}, pausing...")
-                    time.sleep(10)
+                    rate_limit_reset_string = response.headers.get("Ratelimit-Reset")
+                    rate_limit_reset = int(rate_limit_reset_string)
+                    epoch_now = int(time.time())
+                    time_to_wait = rate_limit_reset - epoch_now
+                    if time_to_wait > 0:
+                        print(f"Rate limit hit: {rate_limit_remaining}, pausing for {time_to_wait}")
+                        time.sleep(time_to_wait)
             json_data = response_data.get("data")
             for entry in json_data:
                 data.append(entry)
@@ -109,7 +114,7 @@ async def get_streamer_list(game, session, twitch_oauth_token):
 
 
 async def update_games_list(token):
-    conn = aiohttp.TCPConnector(limit=2)  # raise this until Twitch's rate limiter starts complaining
+    conn = aiohttp.TCPConnector(limit=4)  # raise this until Twitch's rate limiter starts complaining
     session = aiohttp.ClientSession(connector=conn, timeout=0.0)
     print("Getting Top Games")
     games = await get_twitch_api_data(
