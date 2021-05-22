@@ -17,6 +17,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Set this to the deployed url for the cache warmer to hit the server
+# TODO figure out how to trigger a view cache warmup directly from the worker without a request
+URL = "https://twitch-grid.herokuapp.com/"
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
