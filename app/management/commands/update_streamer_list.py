@@ -103,7 +103,7 @@ async def get_streamer_list(game, session, twitch_oauth_token):
         magic_number_viewers += viewer_count ** 3
 
     # fiddling with the magic number calculation
-    magic_number = magic_number_viewers / len(streamers)
+    magic_number = (magic_number_viewers / len(streamers)) ** (1. / 3)
 
     new_game, _ = await sync_to_async(Game.objects.update_or_create)(
         id=game_id,
