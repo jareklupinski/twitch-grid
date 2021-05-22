@@ -115,24 +115,20 @@ async def get_streamer_list(game, session, twitch_oauth_token):
 
 
 async def update_games_list(token):
-    conn = aiohttp.TCPConnector(limit=4)  # raise this until Twitch's rate limiter starts complaining
-    session = aiohttp.ClientSession(connector=conn, timeout=0.0)
     print("Getting Top Games")
-    games = await get_twitch_api_data(
-        url="https://api.twitch.tv/helix/games/top",
-        paginate=True,
-        token=token,
-        session=session
-    )
-    print("Getting Streamers for Top Games")
-    await asyncio.gather(*[get_streamer_list(game, session, token) for game in games])
-    print("Deleting Old Games")
-    game_ids = [game.get("id") for game in games]
-    old_games = await sync_to_async(Game.objects.exclude)(id__in=game_ids)
-    await sync_to_async(old_games.delete)()
-
-    await session.close()
-    await conn.close()
+    async with aiohttp.ClientSession() as session:
+        games = await get_twitch_api_data(
+            url="https://api.twitch.tv/helix/games/top",
+            paginate=True,
+            token=token,
+            session=session
+        )
+        print("Getting Streamers for Top Games")
+        await asyncio.gather(*[get_streamer_list(game, session, token) for game in games])
+        print("Deleting Old Games")
+        game_ids = [game.get("id") for game in games]
+        old_games = await sync_to_async(Game.objects.exclude)(id__in=game_ids)
+        await sync_to_async(old_games.delete)()
 
 
 class Command(BaseCommand):
