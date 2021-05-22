@@ -26,7 +26,7 @@ def index(request):
     return main_page(request, games)
 
 
-# @cache_page(timeout)
-# def magic(request):
-#     games = Game.objects.all().order_by("-magic_number")
-#     return main_page(request, games)
+@cache_page(timeout)
+def magic(request):
+    games = Game.objects.all().order_by("-magic_number")
+    return main_page(request, games)
