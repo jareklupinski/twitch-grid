@@ -16,7 +16,8 @@ from app.models import Game, Process
 # add these to your Heroku -> Setting -> Config Vars using the keys from https://dev.twitch.tv/console/apps/create
 TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID")
 TWITCH_APP_ACCESS_TOKEN = os.environ.get("TWITCH_APP_ACCESS_TOKEN")
-
+# simultaneous connections to the Twitch API
+_num_connections = 30
 
 def get_twitch_api_oauth_token():
     url = "https://id.twitch.tv/oauth2/token"
@@ -49,7 +50,7 @@ async def get_twitch_api_data(url: str, token: str, session, game_id="", paginat
             rate_limit_remaining_string = response.headers.get("Ratelimit-Remaining")
             if rate_limit_remaining_string is not None:
                 rate_limit_remaining = int(rate_limit_remaining_string)
-                if rate_limit_remaining < 10:
+                if rate_limit_remaining < (_num_connections + 10):
                     rate_limit_reset_string = response.headers.get("Ratelimit-Reset")
                     rate_limit_reset = int(rate_limit_reset_string)
                     epoch_now = int(time.time())
@@ -115,20 +116,24 @@ async def get_streamer_list(game, session, twitch_oauth_token):
 
 
 async def update_games_list(token):
+    conn = aiohttp.TCPConnector(limit=_num_connections)  # raise this until Twitch's rate limiter starts complaining
+    session = aiohttp.ClientSession(connector=conn, timeout=0.0)
     print("Getting Top Games")
-    async with aiohttp.ClientSession() as session:
-        games = await get_twitch_api_data(
-            url="https://api.twitch.tv/helix/games/top",
-            paginate=True,
-            token=token,
-            session=session
-        )
-        print("Getting Streamers for Top Games")
-        await asyncio.gather(*[get_streamer_list(game, session, token) for game in games])
-        print("Deleting Old Games")
-        game_ids = [game.get("id") for game in games]
-        old_games = await sync_to_async(Game.objects.exclude)(id__in=game_ids)
-        await sync_to_async(old_games.delete)()
+    games = await get_twitch_api_data(
+        url="https://api.twitch.tv/helix/games/top",
+        paginate=True,
+        token=token,
+        session=session
+    )
+    print("Getting Streamers for Top Games")
+    await asyncio.gather(*[get_streamer_list(game, session, token) for game in games])
+    print("Deleting Old Games")
+    game_ids = [game.get("id") for game in games]
+    old_games = await sync_to_async(Game.objects.exclude)(id__in=game_ids)
+    await sync_to_async(old_games.delete)()
+
+    await session.close()
+    await conn.close()
 
 
 class Command(BaseCommand):
