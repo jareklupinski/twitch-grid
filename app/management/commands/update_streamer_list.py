@@ -5,9 +5,10 @@ import requests
 import aiohttp
 import asyncio
 from asgiref.sync import sync_to_async
+from django.conf import settings
+from django.core.cache import cache
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from django.core.cache import cache
 
 from app.models import Game, Process
 
@@ -148,9 +149,10 @@ class Command(BaseCommand):
         Process.objects.update_or_create(name="game_list_update", defaults={"updated_at": timezone.now()})
         print("Invalidating Cache")
         cache.clear()
-        print("Warming Cache")
-        requests.get('http://localhost')
-        requests.get('http://localhost/magic')
+        if settings.URL is not None:
+            print("Warming Cache")
+            requests.get(settings.URL)
+            requests.get(settings.URL + 'magic')
         t1 = (time.time() - t0) / 60
         # is this java
         self.stdout.write(self.style.SUCCESS(f"Successfully got all Games and Streamers, took {t1:.2f} minutes"))
