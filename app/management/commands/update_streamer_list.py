@@ -75,7 +75,7 @@ async def get_streamer_list(game, session, twitch_oauth_token):
         url="https://api.twitch.tv/helix/streams",
         game_id=game_id,
         token=twitch_oauth_token,
-        paginate=True,
+        paginate=False,
         session=session
     )
     if len(streamers) == 0:
@@ -143,6 +143,9 @@ class Command(BaseCommand):
         Process.objects.update_or_create(name="game_list_update", defaults={"updated_at": timezone.now()})
         print("Invalidating Cache")
         cache.clear()
+        print("Warming Cache")
+        requests.get('http://localhost')
+        requests.get('http://localhost/magic')
         t1 = (time.time() - t0) / 60
         # is this java
         self.stdout.write(self.style.SUCCESS(f"Successfully got all Games and Streamers, took {t1:.2f} minutes"))
