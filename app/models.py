@@ -12,7 +12,7 @@ class Game(models.Model):
     box_art_url = models.CharField(max_length=1024)
     streamers = models.JSONField()
     total_viewers = models.IntegerField()
-    # magic_number = models.IntegerField()
+    magic_number = models.IntegerField()
 
     def __str__(self):
         return self.name
