@@ -54,8 +54,9 @@ async def get_twitch_api_data(url: str, token: str, session, game_id="", paginat
                     rate_limit_reset_string = response.headers.get("Ratelimit-Reset")
                     rate_limit_reset = int(rate_limit_reset_string)
                     epoch_now = int(time.time())
-                    time_to_wait = (rate_limit_reset - epoch_now) + 1
+                    time_to_wait = rate_limit_reset - epoch_now
                     if time_to_wait > 0:
+                        time_to_wait += 1
                         print(f"Rate limit hit: {rate_limit_remaining}, pausing for {time_to_wait}")
                         time.sleep(time_to_wait)
             json_data = response_data.get("data")
