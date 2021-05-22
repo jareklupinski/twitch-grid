@@ -75,9 +75,8 @@ async def get_streamer_list(game, session, twitch_oauth_token):
         url="https://api.twitch.tv/helix/streams",
         game_id=game_id,
         token=twitch_oauth_token,
-        paginate=False,
-        session=session,
-        first=50
+        paginate=True,
+        session=session
     )
     if len(streamers) == 0:
         return
